@@ -10,12 +10,13 @@ It reads each company's own job board directly (Greenhouse, Lever, Ashby, SmartR
 every 15 min (GitHub Actions)
   1. collect   all postings from each company → keep only IDs never seen before
   2. filter    India location → junior software title → description doesn't ask for > 2 yrs
-  3. alert     Telegram message per match (+ logged in history.jsonl)
+  3. alert     Telegram message per match
 ```
 
 - Every posting ID seen (matched or not) is remembered, so each job is alerted only once.
 - The first time a company is checked, its existing jobs are recorded **silently**, so adding a company doesn't flood you.
-- If a company's site fails 3 runs in a row, you get one Telegram warning.
+- If a company's site fails 3 runs in a row, you get one combined Telegram warning.
+- Privacy: the repo is public so GitHub Actions is free, but it never stores or logs which jobs matched. Those only go to your Telegram, and on GitHub the run logs show counts only. Secrets are encrypted and shown as `***`.
 
 ## Setup (about 10 minutes)
 

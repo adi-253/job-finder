@@ -7,12 +7,12 @@ and alert on Telegram.
     python main.py --only Google,Stripe -v   # test specific companies, print every verdict
 """
 import argparse
-import json
+import os
 import sys
 import time
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
-from datetime import date, datetime, timezone
+from datetime import date
 from pathlib import Path
 
 import yaml
@@ -26,6 +26,8 @@ from http_utils import make_session
 ROOT = Path(__file__).parent
 FAIL_ALERT_AFTER = 3   # consecutive failed runs before warning on Telegram
 MAX_DESCRIBE = 80      # cap on description fetches per run
+# GitHub Actions logs of a public repo are public: there, print only counts, never job titles.
+PRIVATE_LOGS = not os.environ.get("GITHUB_ACTIONS")
 
 
 def fetch_company(c):
@@ -97,15 +99,14 @@ def main(argv=None):
     # ---- Stage 0: collect every listed posting, keep the ones not seen before ----
     print(f"Checking {len(companies)} companies…")
     results = run_split(companies, fetch_company, cfg.get("workers", 12), workday_queue)
-    candidates, warnings, ok_count = [], [], 0
+    candidates, broken, recovered, ok_count = [], [], [], 0
     for c, jobs, err, secs in sorted(results, key=lambda r: r[0]["name"].lower()):
         src = state["sources"][c["name"]]
         if err:
             src["failures"] = src.get("failures", 0) + 1
             print(f"  ✗ {c['name']:<22} failed ({src['failures']}x): {err}")
             if src["failures"] == FAIL_ALERT_AFTER:
-                warnings.append(f"⚠️ {c['name']} has failed {FAIL_ALERT_AFTER} runs in a row: {err}\n"
-                                f"Its careers site may have changed. Disable it in config.yaml or fix its fetcher.")
+                broken.append(c["name"])
             continue
         ok_count += 1
         unique = {}
@@ -117,7 +118,7 @@ def main(argv=None):
                 unique[j.uid] = j
         jobs = list(unique.values())
         if src.get("failures", 0) >= FAIL_ALERT_AFTER:
-            warnings.append(f"✅ {c['name']} is working again.")
+            recovered.append(c["name"])
         src["failures"] = 0
         new = [j for j in jobs if j.uid not in state["seen"]]
         for j in jobs:
@@ -140,7 +141,7 @@ def main(argv=None):
         reason = check_title_location(j.title, j.location, fcfg)
         if reason:
             rejected[reason if not reason.startswith("title has") else "senior/other title"] += 1
-            if args.verbose:
+            if args.verbose and PRIVATE_LOGS:
                 print(f"  - {j.company}: {j.title} [{j.location}] → {reason}")
         else:
             passed.append((c, j))
@@ -155,7 +156,8 @@ def main(argv=None):
         reason = check_experience(j.description, fcfg)
         if reason:
             rejected[reason] += 1
-            print(f"  - {j.company}: {j.title} → {reason}")
+            if PRIVATE_LOGS:
+                print(f"  - {j.company}: {j.title} → {reason}")
         else:
             matches.append(j)
     matches.sort(key=lambda j: (j.company.lower(), j.title.lower()))
@@ -163,8 +165,9 @@ def main(argv=None):
     print(f"\n{len(candidates)} new postings → {len(passed)} passed title/location → {len(matches)} matches")
     if rejected:
         print("Rejected: " + ", ".join(f"{k} ×{v}" for k, v in rejected.most_common()))
-    for j in matches:
-        print(f"  ★ {j.company}: {j.title} [{j.location}] {j.url}")
+    if PRIVATE_LOGS:
+        for j in matches:
+            print(f"  ★ {j.company}: {j.title} [{j.location}] {j.url}")
 
     if dry:
         print("\n(dry run: nothing sent, state not saved)")
@@ -172,12 +175,11 @@ def main(argv=None):
 
     if matches:
         notify.send_jobs(matches)
-        with open(ROOT / "history.jsonl", "a") as f:
-            for j in matches:
-                f.write(json.dumps({"found": datetime.now(timezone.utc).isoformat(timespec="minutes"),
-                                    "company": j.company, "title": j.title, "location": j.location, "url": j.url}) + "\n")
-    for w in warnings:
-        notify.send_text(w)
+    if broken:  # one combined message, not one per company
+        notify.send_text(f"⚠️ These companies have failed {FAIL_ALERT_AFTER} checks in a row and are being skipped "
+                         f"until they recover: {', '.join(broken)}. Usually the site is rate-limiting or changed its layout.")
+    if recovered:
+        notify.send_text(f"✅ Working again: {', '.join(recovered)}")
     st.save(state, state_path)
     return 0 if ok_count else 1
 
