@@ -1,0 +1,220 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Job finder config. Add a company = add one line under `companies`.
+#   source: greenhouse | lever | ashby | smartrecruiters  →  needs `slug`
+#           oracle_hcm                                    →  needs host, site (from the careers URL)
+#           workday                                       →  needs tenant, dc, site
+#           google | amazon | microsoft | apple | atlassian | rippling | intuit | goldman
+# Find a company's source by opening one of its job pages: the URL usually shows it
+# (boards.greenhouse.io/<slug>, jobs.lever.co/<slug>, jobs.ashbyhq.com/<slug>,
+#  jobs.smartrecruiters.com/<slug>, <tenant>.<dc>.myworkdayjobs.com/<site>).
+# Set `disabled: true` to switch a company off.
+# ─────────────────────────────────────────────────────────────────────────────
+
+workers: 12
+
+filters:
+  max_years: 2   # reject jobs whose description asks for more than this many years
+
+  locations:     # job location must match one of these (case-insensitive regex)
+    - \bindia\b
+    - bengaluru
+    - bangalore
+    - hyderabad
+    - \bpune\b
+    - gurugram
+    - gurgaon
+    - noida
+    - chennai
+    - mumbai
+    - delhi
+    - kolkata
+    - ahmedabad
+    - kochi
+    - jaipur
+    - mohali
+    - chandigarh
+    - coimbatore
+    - thiruvananthapuram
+    - trivandrum
+    - indore
+
+  title_include: # title must match one of these…
+    - software
+    - \bsde\b
+    - \bsdet\b
+    - \bswe\b
+    - developer
+    - programmer
+    - member\s+(of\s+)?(the\s+)?technical\s+staff
+    - \bmts\b
+    - \bamts\b
+    - full[\s-]?stack
+    - front[\s-]?end
+    - back[\s-]?end
+    - \b(platform|ml|ai|machine learning|data|mobile|android|ios|web|cloud|infrastructure|infra|systems?|application|product|devops|site reliability|reliability|security|qa|test|automation|java|python|golang|go|forward deployed|graduate|associate|junior|new grad|distributed systems|database|compiler|kernel)\s+engineer
+    - \bengineer\s*-?\s*(i|1)\b
+    - new\s+grad
+    - graduate
+    - university
+
+  title_exclude: # …and none of these
+    - \bsenior\b
+    - \bsr\b\.?
+    - (?<!technical\s)\bstaff\b      # but keep "Member of Technical Staff"
+    - \bprincipal\b
+    - \blead\b
+    - \bleader\b
+    - manager
+    - \bmgr\b
+    - \bmgmt\b
+    - \bavp\b                # Assistant Vice President (banks): mid/senior
+    - technical\s+account
+    - \bmanagement\b
+    - architect
+    - director
+    - \bhead\b
+    - \bvp\b
+    - vice\s+president
+    - distinguished
+    - \bfellow\b
+    - \bintern(ship)?\b
+    - \b(ii|iii|iv)\b
+    - (engineer|developer|sde|swe|sdet|engineering)\s*-?\s*[2-9]\b
+    - \bic[3-9]\b
+    - \b(smts|lmts|pmts)\b
+    - \bsme\b
+    - \bexpert\b
+    - \bsales\s+(engineer|executive|representative|associate|specialist)\b   # not "Sales Engineering" team names
+    - pre-?sales
+    - account\s+(executive|manager)
+    - solutions?\s+(engineer|architect|consultant)
+    - support
+    - customer
+    - consultant
+    - recruit
+    - hardware
+    - \basic\b
+    - \bdft\b
+    - physical\s+design
+    - analog
+    - silicon
+    - verification
+    - \bpcb\b
+    - mechanical
+    - electrical
+    - technician
+    - teacher|tutor|faculty
+
+companies:
+  # ── Big Tech (custom career sites) ─────────────────────────────────────────
+  - {name: Google,     source: google, levels: [EARLY]}   # Google's own "early career" level
+  - {name: Amazon,     source: amazon, categories: [software-development, machine-learning-science]}
+  - {name: Microsoft,  source: microsoft, query: software engineer}
+  - {name: Apple,      source: apple, query: software engineer}
+  - {name: Atlassian,  source: atlassian}
+  - {name: Rippling,   source: rippling, slug: rippling}
+  - {name: Intuit,     source: intuit, query: software engineer}
+  - {name: Oracle,     source: oracle_hcm, host: eeho.fa.us2.oraclecloud.com, site: CX_45001}
+  - {name: JPMorgan Chase, source: oracle_hcm, host: jpmc.fa.oraclecloud.com, site: CX_1001}
+  - {name: Goldman Sachs, source: goldman, levels: [Analyst]}   # Analyst = Goldman's entry-level rank
+
+  # ── Workday career sites ───────────────────────────────────────────────────
+  - {name: Salesforce,      source: workday, tenant: salesforce,  dc: wd12, site: External_Career_Site}
+  - {name: Adobe,           source: workday, tenant: adobe,       dc: wd5,  site: external_experienced}
+  - {name: Nvidia,          source: workday, tenant: nvidia,      dc: wd5,  site: NVIDIAExternalCareerSite}
+  - {name: PayPal,          source: workday, tenant: paypal,      dc: wd1,  site: jobs}
+  - {name: Visa,            source: workday, tenant: visa,        dc: wd5,  site: Visa}
+  - {name: Mastercard,      source: workday, tenant: mastercard,  dc: wd1,  site: CorporateCareers}
+  - {name: Cisco,           source: workday, tenant: cisco,       dc: wd5,  site: Cisco_Careers}
+  - {name: Intel,           source: workday, tenant: intel,       dc: wd1,  site: External}
+  - {name: Target,          source: workday, tenant: target,      dc: wd5,  site: targetcareers}
+  - {name: CrowdStrike,     source: workday, tenant: crowdstrike, dc: wd5,  site: crowdstrikecareers}
+  - {name: Morgan Stanley,  source: workday, tenant: ms,          dc: wd5,  site: External}
+  - {name: Capital One,     source: workday, tenant: capitalone,  dc: wd12, site: Capital_One}
+  - {name: LSEG,            source: workday, tenant: lseg,        dc: wd3,  site: Careers}
+  - {name: Autodesk,        source: workday, tenant: autodesk,    dc: wd1,  site: Ext}
+  - {name: Workday,         source: workday, tenant: workday,     dc: wd5,  site: Workday}
+  - {name: Barclays,        source: workday, tenant: barclays,    dc: wd3,  site: External_Career_Site_Barclays}
+  - {name: Deutsche Bank,   source: workday, tenant: db,          dc: wd3,  site: DBWebsite}
+  - {name: Expedia,         source: workday, tenant: expedia,     dc: wd108, site: search}
+  - {name: eBay,            source: workday, tenant: ebay,        dc: wd5,  site: apply}
+  - {name: Broadcom,        source: workday, tenant: broadcom,    dc: wd1,  site: External_Career}
+  - {name: Motorola Solutions, source: workday, tenant: motorolasolutions, dc: wd5, site: Careers}
+  - {name: Zillow,          source: workday, tenant: zillow,      dc: wd5,  site: Zillow_Group_External}
+  - {name: FICO,            source: workday, tenant: fico,        dc: wd1,  site: External}
+  - {name: Postman,         source: workday, tenant: postman,     dc: wd108, site: careers}
+
+  # ── Greenhouse ─────────────────────────────────────────────────────────────
+  - {name: Stripe,          source: greenhouse, slug: stripe}
+  - {name: Databricks,      source: greenhouse, slug: databricks}
+  - {name: Coinbase,        source: greenhouse, slug: coinbase}
+  - {name: Airbnb,          source: greenhouse, slug: airbnb}
+  - {name: Anthropic,       source: greenhouse, slug: anthropic}
+  - {name: MongoDB,         source: greenhouse, slug: mongodb}
+  - {name: Okta,            source: greenhouse, slug: okta}
+  - {name: Zscaler,         source: greenhouse, slug: zscaler}
+  - {name: Rubrik,          source: greenhouse, slug: rubrik}
+  - {name: Datadog,         source: greenhouse, slug: datadog}
+  - {name: Elastic,         source: greenhouse, slug: elastic}
+  - {name: GitLab,          source: greenhouse, slug: gitlab}
+  - {name: Twilio,          source: greenhouse, slug: twilio}
+  - {name: Netskope,        source: greenhouse, slug: netskope}
+  - {name: New Relic,       source: greenhouse, slug: newrelic}
+  - {name: Sumo Logic,      source: greenhouse, slug: sumologic}
+  - {name: Harness,         source: greenhouse, slug: harnessinc}
+  - {name: Druva,           source: greenhouse, slug: druva}
+  - {name: Anaplan,         source: greenhouse, slug: anaplan}
+  - {name: Zuora,           source: greenhouse, slug: zuora}
+  - {name: Samsara,         source: greenhouse, slug: samsara}
+  - {name: Toast,           source: greenhouse, slug: toast}
+  - {name: Navan,           source: greenhouse, slug: tripactions}
+  - {name: Mixpanel,        source: greenhouse, slug: mixpanel}
+  - {name: Figma,           source: greenhouse, slug: figma}
+  - {name: Adyen,           source: greenhouse, slug: adyen}
+  - {name: Agoda,           source: greenhouse, slug: agoda}
+  - {name: YugabyteDB,      source: greenhouse, slug: yugabyte}
+  - {name: HighRadius,      source: greenhouse, slug: highradius}
+  - {name: Zeta Global,     source: greenhouse, slug: zetaglobal}
+  - {name: Razorpay,        source: greenhouse, slug: razorpaysoftwareprivatelimited}
+  - {name: Groww,           source: greenhouse, slug: groww}
+  - {name: InMobi,          source: greenhouse, slug: inmobi}
+  - {name: HackerRank,      source: greenhouse, slug: hackerrank}
+  - {name: Observe.AI,      source: greenhouse, slug: observeai}
+  - {name: IMC Trading,     source: greenhouse, slug: imc}
+  - {name: Jump Trading,    source: greenhouse, slug: jumptrading}
+  - {name: WorldQuant,      source: greenhouse, slug: worldquant}
+  - {name: AQR,             source: greenhouse, slug: aqr}
+
+  # ── Lever ──────────────────────────────────────────────────────────────────
+  - {name: CRED,            source: lever, slug: cred}
+  - {name: Meesho,          source: lever, slug: meesho}
+  - {name: Paytm,           source: lever, slug: paytm}
+  - {name: Zeta,            source: lever, slug: zeta}
+  - {name: FamPay,          source: lever, slug: fampay}
+  - {name: Mindtickle,      source: lever, slug: mindtickle}
+  - {name: Veeva Systems,   source: lever, slug: veeva}
+  - {name: Coupa,           source: lever, slug: coupa}
+  - {name: Outreach,        source: lever, slug: outreach}
+
+  # ── Ashby ──────────────────────────────────────────────────────────────────
+  - {name: OpenAI,          source: ashby, slug: openai}
+  - {name: Snowflake,       source: ashby, slug: snowflake}
+  - {name: Notion,          source: ashby, slug: notion}
+  - {name: Tekion,          source: ashby, slug: tekion}
+  - {name: Sarvam AI,       source: ashby, slug: sarvam}
+  - {name: Atlan,           source: ashby, slug: atlan}
+  - {name: Amplitude,       source: ashby, slug: amplitude}
+  - {name: Redis,           source: ashby, slug: redis}
+  - {name: Thoughtworks,    source: ashby, slug: thoughtworks}
+
+  # ── SmartRecruiters ────────────────────────────────────────────────────────
+  - {name: ServiceNow,      source: smartrecruiters, slug: ServiceNow}
+  - {name: PhonePe,         source: smartrecruiters, slug: PHONEPELIMITED}
+  - {name: Swiggy,          source: smartrecruiters, slug: Swiggy}
+  - {name: Freshworks,      source: smartrecruiters, slug: Freshworks}
+  - {name: Wise,            source: smartrecruiters, slug: Wise}
+  - {name: Grab,            source: smartrecruiters, slug: Grab}
+  - {name: Whatfix,         source: smartrecruiters, slug: Whatfix}
+  - {name: Upstox,          source: smartrecruiters, slug: Upstox}
+  - {name: Unacademy,       source: smartrecruiters, slug: Unacademy}
+  - {name: Cars24,          source: smartrecruiters, slug: Cars24}
