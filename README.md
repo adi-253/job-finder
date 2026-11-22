@@ -15,7 +15,7 @@ every 15 min (GitHub Actions)
 
 - Every posting ID seen (matched or not) is remembered, so each job is alerted only once.
 - The first time a company is checked, its existing jobs are recorded **silently**, so adding a company doesn't flood you.
-- If a company's site fails 3 runs in a row, you get one combined Telegram warning.
+- If a company's site fails 8 runs in a row (~2 hours), you get one combined Telegram warning. A failed check loses nothing: the next successful run picks up anything new.
 - Privacy: the repo is public so GitHub Actions is free, but it never stores or logs which jobs matched. Those only go to your Telegram, and on GitHub the run logs show counts only. Secrets are encrypted and shown as `***`.
 
 ## Setup (about 10 minutes)
