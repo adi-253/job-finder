@@ -24,7 +24,7 @@ from filters import check_experience, check_title_location
 from http_utils import make_session
 
 ROOT = Path(__file__).parent
-FAIL_ALERT_AFTER = 8   # consecutive failed runs (~2 hours) before warning on Telegram; Workday is often briefly rate-limited
+FAIL_ALERT_AFTER = 3   # consecutive failed hourly runs (~3 hours) before warning on Telegram; Workday is often briefly rate-limited
 MAX_DESCRIBE = 80      # cap on description fetches per run
 # GitHub Actions logs of a public repo are public: there, print only counts, never job titles.
 PRIVATE_LOGS = not os.environ.get("GITHUB_ACTIONS")

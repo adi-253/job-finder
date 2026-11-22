@@ -2,7 +2,7 @@ name: Check for new jobs
 
 on:
   schedule:
-    - cron: "*/15 * * * *"   # every 15 min (GitHub may start it a few minutes late)
+    - cron: "7 * * * *"      # hourly, at :07 (GitHub is busiest on the hour; runs may still start a few minutes late)
   workflow_dispatch:
     inputs:
       seed:
